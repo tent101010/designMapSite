@@ -1,0 +1,209 @@
+function popWrapper() {
+     // get the arguments passed by bindAsEventListener
+     var data = $A( arguments );
+     // First, see if there's already a PopAndDim object and make one if necessary
+     if ( pAndD=='undefined' ) {
+          pAndD = new PopAndDim( data[4], data[5] );
+          pAndD.showDark();
+     }
+     // If there is an object already and the popCount is zero, then turn the dark property on.
+     else if ( pAndD.popColl.length == 0 ) pAndD.showDark();
+     var pd = new PopDiv( data[1], data[2], data[3], data[5] );
+     pAndD.addPopDiv( pd );
+} 
+
+/*
+This little package contains two classes, PopAndDim and PopDiv, which enable easy placement of a popup div on an HTML page. The idea is to dim the original content, make that content inactive, and put up a DHTML popup (or more than one).
+
+Dependencies:
+     prototype.js version 1.6 or better (http://prototypejs.org)
+     scriptaculous.js, version 1.8.1 or better (http://script.aculo.us/)
+
+Thanks: This Javascript class picks bits and pieces from the X Library (http://www.cross-browser.com/). Thanks to Michael Foster for all the hard work. I've only used one entire function here, but I studied varius files in the X Library which informed other things I've done and proved generally insightful.
+
+Tested on IE 6, IE 7, FF 2.x, Safari 3.x, and Opera 9.26 though it's final appearance depends on the CSS applied, so if the result is not what you expect, look at your styles before assuming there is something wrong with this code.
+*/
+
+/* Class PopAndDim
+Properties:
+     opacity - This value is passed in at construction and is used to set the opacity of of the dark div. Pass a number between 0 and 1. If the input is < 0, opacity will be set to 0. If the input is > 1, the opacity will be set to 1.
+     transitionTime - This value is passed in at construction and is used to set the length of time for the dark div to fade in and out. This effect is done via the scriptaculous library's Effect.Appear and Effect.Fade objects. 
+     curZ - This value is used to set z-indexes. The dark layer is given 99 and the value is incremented for each popoup that is attached to the page. Therefore, order matters. You should add popups such that the last one you add is the one you want to appear on top.
+     dark - a div set with the opacity property. 'dark' covers the current document entirely and lies immediately on top of the main content and underneath any and all visible popups. 'dark' is attached when the first popup is attached and removed when the last popup is gone. You should create exactly one instance of PopAndDim on each page. There's nothing stopping you from creating more, but you can expect problems, starting with the fact that 'dark' is given as the HTML element id 'darkDiv'. Create more than one instance of this class, and you'll be trying to create more than one element with the same id. Naturally, this also means that the id 'darkDiv' must not already exist in your HTML.
+     popColl - a collection of PopDiv instances currently attached to the page. Used to manage multiple popups on one page.
+
+Methods:
+     showDark() - put up the dark div on top of the main content covering the entire viewport, or, if it's larger than the viewport, the entire page.
+     refreshDark() - used if, after some dynamic junk happens on the page, the darkDiv doesn't cover as described above
+     addPopDiv() - attach a popup to the page, position it and show it (both calls to methods belonging to the PopDiv instance).
+     hidePopDiv() - Just what it says and decrements popCount. Use this if you want to temporarily hide a popup but may want to bring it back.
+     removePopDiv() - Very much like hidePopDiv(), but the element is removed from the page - you can't get it back without reloading.
+     scanPopDivColl() - Takes a string argument and tries to match that string with the content.id of a member of the collection. Returns the matching element if it exists.
+*/
+// constructor
+function PopAndDim( opacity, transitionTime ) {
+     // instance properties 
+     if ( opacity < 0 ) this.opacity = 0;
+     else if ( opacity > 1 ) this.opacity = 1;
+     else this.opacity = opacity;
+     
+     this.transitionTime = transitionTime;
+     
+     this.curZ = 99;
+
+     this.dark = (function() {
+          var dims = xDocSize();
+          var d = new Element( 'div', {id:'darkDiv'} );
+          d.setStyle( {  position:'absolute', 
+                         overflow:'hidden', 
+                         top:'0px', 
+                         left:'0px', 
+                         backgroundColor:'#000', 
+                         height:dims.h + 'px', 
+                         width:dims.w + 'px', 
+                         'z-index':this.curZ} );
+          document.body.appendChild( d );
+          d.hide();
+          return d;
+          })();
+     
+     this.popColl = new Array();
+}
+
+// instance methods 
+PopAndDim.prototype.showDark = function() { 
+     var dims = xDocSize();
+     this.dark.setStyle( {height:dims.h + 'px', width:dims.w + 'px'} );
+     Effect.Appear( this.dark, {to:this.opacity, duration:this.transitionTime} ); 
+}
+
+PopAndDim.prototype.hideDark = function() {
+     if ( this.popColl.length == 0 ) {
+          Effect.Fade( this.dark, {duration:this.transitionTime} );
+     }
+}
+
+PopAndDim.prototype.refreshDark = function() {
+     var dims = xDocSize();
+     this.dark.setStyle( {height:dims.h + 'px', width:dims.w + 'px'} );
+}
+
+PopAndDim.prototype.addPopDiv = function( aPopDiv ) {
+     this.popColl.push( aPopDiv );
+     aPopDiv.pop.setStyle( {zIndex:++this.curZ} );
+     document.body.appendChild( aPopDiv.pop );
+     PopDiv.position( aPopDiv );
+     aPopDiv.pop.hide();
+     aPopDiv.showPop();
+}
+
+PopAndDim.prototype.hidePopDiv = function( aPopDiv ) {
+     aPopDiv.hidePop();
+     for ( var i=0; i<this.popColl.length; i++ ) {
+          if ( this.popColl[i].content.id == aPopDiv.content.id ) this.popColl.splice( i, 1 );
+     }
+     //alert( this.popColl );
+     // if there's nothing else left in PopAndDim's popColl array, remove the dark div too
+     this.hideDark();
+}
+
+PopAndDim.prototype.removePopDiv = function( aPopDiv ) {
+     aPopDiv.hidePop();
+     // remove the div element from the page
+     aPopDiv.pop.remove();
+     for ( var i=0; i<this.popColl.length; i++ ) {
+          if ( this.popColl[i].content.id == aPopDiv.content.id ) this.popColl.splice( i, 1 );
+     }
+     // if there's nothing else left in PopAndDim's popColl array, remove the dark div too
+     this.hideDark();
+}
+
+PopAndDim.prototype.scanPopDivColl = function( aString ) {
+     for ( var i = 0; i < this.popColl.length; i++ ) {
+          if ( this.popColl[i].content.id == aString ) return pAndD.popColl[i]; 
+     }
+     return null;
+} 
+// end PopAndDim
+
+// xDocSize r1, Copyright 2007 Michael Foster (Cross-Browser.com)
+// Part of X, a Cross-Browser Javascript Library, Distributed under the terms of the GNU LGPL
+
+function xDocSize() {
+     var b = document.body
+     var e = document.documentElement;
+     var esw = 0, eow = 0, bsw = 0, bow = 0, esh = 0, eoh = 0, bsh = 0, boh = 0;
+     if (e) {
+          esw = e.scrollWidth;
+          eow = e.offsetWidth;
+          esh = e.scrollHeight;
+          eoh = e.offsetHeight;
+     }
+     if (b) {
+          bsw = b.scrollWidth;
+          bow = b.offsetWidth;
+          bsh = b.scrollHeight;
+          boh = b.offsetHeight;
+     }
+     return {w:Math.max( esw, eow, bsw, bow ),h:Math.max( esh, eoh, bsh, boh )};
+}
+
+
+/* Class PopDiv 
+Properties:
+     height - the height of the popup 
+     width - with width of the popup
+     content - an HTML element object. It either exists already in the HTML or has been created dynamically. This HTML element contains the content to be displayed inside the popup div.
+     transTime - This value is passed in at construction and is used to set the length of time for the dark div to fade in and out. This effect is done via the scriptaculous library's Effect.Appear and Effect.Fade objects. 
+     pop - the actual HTML element that will be attached to the page. This element is just a container with a white background, no borders - pretty plain. Since the actual content is either in a hidden element already existing in the page or a dynamic element, simply create CSS rules that apply to the those elements. The exception to this are the height and width rules, which are passed in at construction. Don't set these styles in your stylesheet - asking for trouble. A couple of other things happen in connection with property pop:
+          1. property 'content', which is an HTML element containing the popup content  gets attached to pop
+          2. property 'content' is made visible - If the content you wish to have show up in a popup is in the HTML page, then it's likely you've hidden it. IMPORTANT: set display:none as a style attribute inside your HTML tag. Hey, I don't like it either, but Prototype.js's show() and hide() functions goof up if display:none isn't set this way. 
+
+Methods:
+     position() - places this popup, or more specifically the 'pop' property of this PopDiv instance, in the center of the viewport. Once set, the position of a popup div does not change regardless of window resize or scrolling of content. 
+     showPop() - makes the popup visible
+     hidePop() - hides the popup    
+*/
+
+// constructor
+function PopDiv( aHeight, aWidth, someContent, aTime ) {
+     // instance properties
+     
+     this.height = aHeight;
+     
+     this.width = aWidth;
+    
+     if ( Object.isElement( someContent ) ) {
+          this.content = someContent; 
+     } else { 
+          alert( someContent.toString() + " is not an HTML element. Make sure the HTML element that you want to use for content exists before calling the PopDiv constructor. Common problems:\n - Calling the PopDiv constructor before the DOM has loaded. Make sure you're waiting for the 'load' event to complete." );
+          return 0;
+     }
+     
+     this.transTime = aTime;
+
+     this.pop = new Element( 'div' );
+     this.pop.setStyle( {position:'absolute', background:'#fff', height:this.height + 'px', width:this.width + 'px'} );
+     this.pop.writeAttribute( {id:this.pop.identify()} );
+     this.pop.appendChild( this.content );
+     this.content.show();
+}
+
+// class methods
+PopDiv.position = function( aPopDiv ) {
+     var vpScrollOffs = document.viewport.getScrollOffsets();
+     var vpDims = document.viewport.getDimensions();
+     var popDims = aPopDiv.pop.getDimensions();
+     var l = vpScrollOffs[0]+(vpDims.width-popDims.width)/2;
+     var t = vpScrollOffs[1]+(vpDims.height-popDims.height)/2;
+     aPopDiv.pop.setStyle( {top:t+'px', left:l+'px'} );
+}
+
+PopDiv.prototype.showPop = function() {
+     Effect.Appear( this.pop, {to:1, duration:this.transTime} );
+}
+
+PopDiv.prototype.hidePop = function() {
+     Effect.Fade( this.pop, {to:0, duration:this.transTime} );
+}
+

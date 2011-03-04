@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+          <title>How to use Javasrcipt classes PopAndDim and PopDiv</title>
+          <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+          <link rel="stylesheet" type="text/css" href="main.css">
+          <script type="text/javascript" src="/lib/javascript/prototype-1.6.0.2.js"></script>
+          <script type="text/javascript" src="/lib/javascript/scriptaculous-js-1.8.1/src/scriptaculous.js"></script>
+          <script type="text/javascript" src="PopDiv.js"></script>
+          <script type="text/javascript" src="script.js"></script>
+     </head>
+     <body>
+          <div id="frame">
+               <div id="intro">
+                    <h1>Javascript Popup Divs</h1>
+                    <p>The two Javascript classes, PopAndDim and PopDiv, create popup divs that are passed dimensions, content, and fade-in/out information at runtime. When the first popup div fades in on the page, another div fades in at the same time lying on top of the main content and underneath the popup. The obscuring div fills the entire viewport if the page is smaller than the viewport and the entire page if the page extends beyond the viewport. It is possilbe to place many popups on the same page. By default each popup is centered in the browser window.</p>
+                    <p>This page documents the use of a wrapper function, popWrapper(), that minimizes the amount of programming required to use these classes. To use the API for the classes, see the documentation inside PopDiv.js.
+                    <p>Tested on IE6 (standalone), IE7, Firefox 2.x, Opera 9.x, and Safari 3.x</p>
+               </div>
+               <div>
+                    <p><input id="one" type="button" value="Try one by button."></p>
+                    <p><a id="two" href="#">Try one by link.</a></p>
+                    <p><span class="note">If these examples don't work for you, make sure you have <a href="http://prototypejs.org/download">prototype.js</a> and <a href="http://script.aculo.us/downloads/">scriptaculous.js</a> and that your paths to those files are correct.<br>
+                    If the examples still don't work, make sure that your browser's preferences are set such that Javascript is on.</span></p>
+               </div>
+               <div>
+                    <h2>How to use</h2>
+                    <p>To use this code, link to prototype.js and PopDiv.js in the &lt;head&gt; tag of your HTML document and follow the examples below to create a third external Javascript file that hooks up popup objects to events/elements and content on your page. This version will not work well if you try to create or manipulate popups from 'onclick' or other similar event attributes in your HTML. It's expected that you can and want to use Javascript in an unobtrusive manner.</p>
+                    <p>For example, if you are accustomed to executing Javascript by adding attributes to your HTML like this...</p>
+                    <pre><code>&lt;a href="#" onclick="popWrapper.bindAsEventListener( null, 200, 400, $('popupOne'), 0.85, 2 );"&gt;a link&lt;/a&gt;</code></pre>
+                    <p>...it's time to move on. In the interest of writing cleaner, more maintainable, more readable, more versatile code, it's a good idea to separate Javascript code from HTML markup from CSS presentation. We can trigger Javascript when something happens on a page (like clicking on a link) by registering events that Javascript watches for. When Javascript sees that a registered event has happened, it executes the associated code. Using the prototype.js library this is very, very easy to do. Here is code that does the same thing as in the above 'onclick' attribute setting:</p>
+                    <p class="indent">The HTML:</p>
+                    <p class="indent"><code>&lt;a href="#" id="one"&gt;a link&lt;/a&gt; <span class="note">The function call is gone and an id attribute has been added.</span></code></p>
+                    <p class="indent">The Javascript - preferably in a separate file that you've linked into the HTML page:</p>
+                    <pre><code>
+Event.observe( window, "load", function () {
+     $('one').observe( 'click', popWrapper.bindAsEventListener( null, 200, 400, $('popupOne'), 0.85, 2 ) );
+} );
+     <span class="note">The arguments you provide popWrapper are passed via the bindAsEvenListener method.
+     'null'        - bindAsEventListener() expects an object as it's first argument. 
+                     We don't need to pass an object, but we have to pass something 
+                     because the method will treat its first argument as an object, 
+                     which will screw things up for us. Always pass 'null' as the first argument.
+     '200'         - the height of the popup window.
+     '400'         - the width of the popup window.
+     $('popupOne') - an HTML element. $() is a Prototype.js shortcut for the standard DOM method 
+                     getElementById( 'popupOne' ). This argument must be an existing HTML element. 
+                     Don't try passing a string.
+     0.85          - opacity of the dark layer, 0 being fully transparent and 1.0 being fully opaque.
+     2             - fade-in/out duration. This sets the duration for fade-ins/outs on BOTH the 
+                     obscuring div and popups. If you want greater control, use the API methods to 
+                     instantiate a PopAndDim instance and PopDiv instances to your specifications - 
+                     or pay me to add this capability to this wrapper function (he he).</span>
+                    </code></pre>
+                    <p class="indent">There are just a a couple of important things going on here:</p>
+                    <ol class="indent">
+                         <li>To register an event on a page element (like an &lt;a&gt; tag), that element must already exist. That is, the page, more specifically the DOM, must have loaded. That's what's going on in the first line of the Javascript: it's observing the window, waiting for the 'load' event to complete.</li>
+                         <li>When the page is done loading Javascript starts observing the HTML element with id="one". Javascript is watching for a 'click' on this element, and when it sees one it will fire the popWrapper.bindAsEventListener( ... ) function.</li>
+                    </ol>
+                    That's it. Using this simple method, you can register any number of event/element pairs with unobtrusive Javascript.
+                    <p>Now, let's look at how to make the popups go away. You have two choices:
+                    <ol>
+                         <li>Hide them - use this if you want to be able to bring them back up again without reloading the page.</li>
+                         <li>Remove them - use this to take them out completely off the page. They'll be removed from the DOM, and the only way to get them back will be reload the page.</li>
+                    </ol>
+                    <p>The examples on this page all use the hiding method, which is why you can repeatedly open and close the popups.</p>
+                    <p>Here's the code to make popup go away. Again, these method calls can be triggered by any event in the browser. You are not tied to using a button as I've done here.
+                    <p class="indent">The HTML:</p>
+                    <pre><code>
+<span class="note">Chances are you'll want to hind the popup content until it's needed.
+It's important to hide that contant with an inline style rule, violating the principles
+of separation of markup and presentation. It has to be done this way because methods from
+prototype.js are used in the PopAndDim and PopDiv classes. Those methods will goof up
+if this content is not hidden in this way. If you put this rule into and external style
+sheet, you can expect trouble.</span>
+&lt;div id="popupOne" style="display:none;"&gt;
+     test popup #1.
+     &lt;br&gt;
+     <span class="note">Here's the button that, when clicked, will trigger the hide method on the popup.</span>
+     &lt;input id="closePop1" type="button" value="Close" /&gt; 
+     &lt;br&gt;
+     &lt;input id="twoUp" type="button" value="Add another one..." /&gt;
+     &lt;br&gt;
+     &lt;input id="threeUp" type="button" value="Add a third one..." /&gt;
+&lt;/div&gt;
+                    </code></pre>
+               <p class="indent">The Javascript:</p>
+               <pre><code>
+$('closePop1').observe( 'click', function() {
+     var target = pAndD.scanPopDivColl( 'popupOne' );
+     <span class="note">Use removePopDiv() here if this popup will not be needed again.</span>
+     if ( target != null ) pAndD.hidePopDiv( target ); 
+} );
+                    </code></pre>
+                    <p class="indent">Note 'closePop1' is the id given to the button element in the HTML.</p>
+                    <h2>To apply styles to the poups</h2>
+                    <p>The code provides a container and places the specified popup content inside. In the above example the content is passed into the popWrapper by giving 'popupOne' as an argument. 'popupOne' is the ID of an exitisting HTML element in this page. It could also be a dynamically created element. If you provide CSS rules that apply to the id 'popupOne', your content will be styled the way you want it. The container is set with three styles: white background (hard coded but would be overridden by a background applied to the content you are putting in the popup), and height and width, both of which you provide in the function call that creates a popup. Do keep in mind that the styles you apply to the content can interfere with the styles applied to the container. Namely, this means height and width. If the styles you apply to your content add up to a width greater than what you supplied in the call to popWrapper, you can expect trouble.</p>
+               </div>
+          </div>
+          <div id="popupOne" style="display:none;">
+               test popup #1.<br><input id="closePop1" type="button" value="Close">
+               <br><input id="twoUp" type="button" value="Add another one...">
+               <br><input id="threeUp" type="button" value="Add a third one...">
+          </div>
+          <div id="popupTwo" style="display:none;">
+               test popup #2.<br><input id="closePop2" type="button" value="Close">
+          </div>
+          <div id="popupThree" style="display:none;">
+               test popup #3.<br><input id="closePop3" type="button" value="Close">
+          </div>
+          <div id="popupFour" style="display:none;">
+               test popup #4.<br><input id="closePop4" type="button" value="Close">
+          </div>
+     </body>
+</html>
