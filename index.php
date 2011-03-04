@@ -138,7 +138,7 @@ pageTracker._trackPageview();
         <div class="screenReaders">DesignMap is working to make this site fully accessible. If you are having difficulty seeing or using the site please let us know.</div>
         <iframe id="yui-history-iframe" src="blank.html" height="0" width="0" frameborder="0"></iframe>
         <input id="yui-history-field" type="hidden"> 
-<?php include_once( $_SERVER['DOCUMENT_ROOT'] . $base_path . 'header.php' ); ?>
+<?php include_once( 'header.php' ); ?>
         <!-- begin over content - what's written on the window shade -->
         <div id="overUpper">
           <div id="topSecWrapper"> <!-- for script.aculo.us -->
@@ -212,7 +212,7 @@ pageTracker._trackPageview();
       <div id="navContainerTwo" class="navContNorm">
         <div id="lowCol1WithShadeAction">
           <?php 
-		  include_once( $_SERVER['DOCUMENT_ROOT'] . $base_path . 'nav.php' );
+		  include_once( 'nav.php' );
 		  
 		  		
 		  ?>
@@ -288,7 +288,7 @@ pageTracker._trackPageview();
         </div>
       </div>
     </div>
-    <?php include_once( $_SERVER['DOCUMENT_ROOT'] . $base_path . 'footer.php' ); ?>
+    <?php include_once( 'footer.php' ); ?>
     <img src="images/icon_rss_over.png" width="16" height="27" alt="RSS" style="display:none;" />
     <img src="images/icon_twitter_over.png" width="16" height="27" alt="Twitter" style="display:none;" />
     <img src="images/icon_facebook_over.png" width="16" height="27" alt="Facebook" style="display:none;" />

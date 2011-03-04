@@ -37,7 +37,7 @@ pageTracker._trackPageview();
             <iframe id="yui-history-iframe" src="blank.html" height="0" width="0" frameborder="0"></iframe> 
             <input id="yui-history-field" type="hidden"> 
 
-            <?php include_once( $_SERVER['DOCUMENT_ROOT'] . $base_path . 'header.php' ); ?>        
+            <?php include_once( 'header.php' ); ?>        
 
             <!-- begin over content - what's written on the window shade -->
             <div id="overUpperWork">
@@ -263,7 +263,7 @@ pageTracker._trackPageview();
       <div id="navContainerNoShadeAction">
          <div class="container">
             <div id="lowCol1NoShadeAction">
-               <?php include_once( $_SERVER['DOCUMENT_ROOT'] . $base_path . 'nav.php' ); ?>
+               <?php include_once( 'nav.php' ); ?>
             </div>
             <div id="lowCol2" class="lowColTwoTopOpen rtSide">
                <div id="openTopWrapper"> <!-- for script.aculo.us -->
@@ -285,6 +285,6 @@ pageTracker._trackPageview();
             </div>
          </div>
       </div>
-      <?php include_once( $_SERVER['DOCUMENT_ROOT'] . $base_path . 'footer.php' ); ?>
+      <?php include_once( 'footer.php' ); ?>
    </body>
 </html>

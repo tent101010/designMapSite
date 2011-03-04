@@ -25,7 +25,7 @@ pageTracker._trackPageview();
         <div class="screenReaders">DesignMap is working to make this site fully accessible. If you are having difficulty seeing or using the site please let us know.</div>
         <iframe id="yui-history-iframe" src="blank.html" height="0" width="0" frameborder="0"></iframe>
         <input id="yui-history-field" type="hidden"> 
-        <?php include_once( $_SERVER['DOCUMENT_ROOT'] . $base_path . 'header.php' ); ?>        
+        <?php include_once( 'header.php' ); ?>        
         <!-- begin over content - what's written on the window shade -->
         <div id="overUpper">
           <div id="topSecWrapper"> <!-- for script.aculo.us -->
@@ -49,7 +49,7 @@ pageTracker._trackPageview();
     <div id="navContainer">
       <div id="navContainerTwo" class="navContNorm">
         <div id="lowCol1WithShadeAction">
-          <?php include_once( $_SERVER['DOCUMENT_ROOT'] . $base_path . 'nav.php' ); ?>
+          <?php include_once( 'nav.php' ); ?>
         </div>
         <div id="lowCol2" class="lowColTwoTopOpen rtSide">
           <div id="openTopWrapper"> <!-- for script.aculo.us -->
@@ -81,7 +81,7 @@ pageTracker._trackPageview();
         </div>
       </div>
     </div>     
-    <?php include_once( $_SERVER['DOCUMENT_ROOT'] . $base_path . 'footer.php' ); ?>
+    <?php include_once( 'footer.php' ); ?>
     <script src="/lib/javascript/prototypeExtensions/rsv.js" type="text/javascript"></script>
   </body>
 </html>
